@@ -7,6 +7,8 @@ function _init()
     printable = 0
     --
     init_level()
+    -- diable btn repeat
+    poke(0x5f5d, 25)
 end
 
 function init_level()
@@ -21,8 +23,8 @@ function init_level()
     --         end
     --     end
     -- end
-    create(blob, 16, 16)
-    create(blob_green, 32, 16)
+    create(blob, 8, 0)
+    create(blob_green, 32, 0)
 end
 
 function _update60()
@@ -84,7 +86,7 @@ function _draw()
 
     -- UI
     
-    print(printable, cam.x + 80, cam.y + 120, 4)
+    print(printable, cam.x + 80, cam.y + 8, 4)
 end
 
 -- UTILS
