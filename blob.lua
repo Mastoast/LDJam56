@@ -66,11 +66,13 @@ function blob.update(self)
 
     -- shoot missile
     if btnp(🅾️) and self.hit_w > 2 then
-        self.hit_h -= self.nbscale; self.hit_w -= self.nbscale
-        local m = create(missile, self.x + self.hit_h/2, self.y)
-        m.hit_h = self.hit_h - self.nbscale; m.hit_w = self.hit_w - self.nbscale
+        local m = create(missile, self.x + self.hit_w/2, self.y)
+        m.hit_h = self.hit_h - 2*self.nbscale
+        m.hit_w = self.hit_w - 2*self.nbscale
         m.speed_x = (self.facing * 1.5 + self.speed_x) * self.hit_w / 8
-        m.speed_y = (btn(⬆️) and -1.5 or -0.5) * self.hit_h / 8
+        m.speed_y = (not btn(⬆️) and -0.5 or -1.5) * self.hit_h / 8
+        if btn(⬆️) and abs(self.speed_x) < 0.2 then m.speed_y, m.speed_x = -2.5, 0 end
+        scale_down(self)
     end
 
     -- move
