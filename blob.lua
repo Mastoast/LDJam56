@@ -120,7 +120,7 @@ end
 
 
 blob_green = new_type(1)
-blob_green.sprs = {1, 2, 1, 3}
+blob_green.sprs = {17, 18}
 blob_green.solid = false
 
 function blob_green.update(self)
@@ -143,7 +143,7 @@ function blob_green.update(self)
 end
 
 function blob_green.draw(self)
-    local anim_speed = 16
+    local anim_speed = 32
     local current_spr = self.speed_y != 0 and self.jump_spr
     or self.sprs[flr(gtime / anim_speed) % #self.sprs + 1]
     sspr((current_spr % 16) * 8, flr(current_spr \ 16) * 8,

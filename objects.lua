@@ -13,7 +13,6 @@ missile.sprs = {5, 6, 7}
 
 function missile.update(self)
 
-
     self:move_x(self.speed_x, function(self, ox, nx)
         self:dmg()
     end)
@@ -47,6 +46,38 @@ function missile.draw(self)
     local current_spr = abs(self.speed_x) > thsp * abs(self.speed_y) and self.sprs[3]
     or abs(self.speed_y) > thsp * abs(self.speed_x) and self.sprs[1]
     or self.sprs[2]
+    sspr((current_spr % 16) * 8, flr(current_spr \ 16) * 8,
+    self.spr_w, self.spr_h, self.x, self.y, self.hit_w, self.hit_h, self.flip_x, self.flip_y)
+end
+
+bat = new_type(10)
+bat.sprs = {10, 12}
+bat.hit_w = 16
+bat.spr_w = 16
+
+function bat.update(self)
+
+    -- fly pattern
+    self.speed_x = 1.5 * cos(gtime / 60)
+    self.speed_y = 0.5 * sin(gtime / 180)
+
+    self:move_x(self.speed_x, function(self, ox, nx)
+        self.speed_x = 0
+    end)
+
+    self:move_y(self.speed_y, function(self, oy, ny)
+        self.speed_y = 0
+    end)
+end
+
+function bat.dmg(self)
+    self.destroyed = true
+    spawn_particles(10, 2, self.x, self.y, 5)
+end
+
+function bat.draw(self)
+    local anim_speed = 16
+    local current_spr = self.sprs[flr(gtime / anim_speed) % #self.sprs + 1]
     sspr((current_spr % 16) * 8, flr(current_spr \ 16) * 8,
     self.spr_w, self.spr_h, self.x, self.y, self.hit_w, self.hit_h, self.flip_x, self.flip_y)
 end

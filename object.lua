@@ -106,6 +106,12 @@ function object.check_solid(self, ox, oy)
     if not self.ghost then
         for o in all(objects) do
             if o != self and not o.destroyed and o.solid and self:overlaps(o, ox, oy) then
+                if self.base == bat and o.base == missile then
+                    self:dmg()
+                end
+                if self.base == missile and o.base == bat then
+                    o:dmg()
+                end
                 if not (self.base == missile and o.base == blob) then
                     return true
                 end
