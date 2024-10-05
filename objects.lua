@@ -5,6 +5,52 @@ function rectangle.draw(self)
     rectfill(self.x, self.y, self.x + self.hit_w - 1, self.y + self.hit_h - 1, self.color)
 end
 
+missile = new_type(5)
+missile.color = 8
+missile.acc = 0.1
+missile.friction = 0.97
+missile.sprs = {5, 6, 7}
+
+function missile.update(self)
+
+
+    self:move_x(self.speed_x, function(self, ox, nx)
+        self:dmg()
+    end)
+
+    self:move_y(self.speed_y, function(self, oy, ny)
+        self:dmg()
+    end)
+
+    if abs(self.speed_x) < 0.05 and abs(self.speed_y) < 0.05 then
+        self.speed_x = 0
+        self.speed_y = 0
+    end
+
+    self.speed_x *= self.friction
+    self.speed_y += 0.05
+end
+
+function missile.dmg(self)
+    self.destroyed = true
+    spawn_particles(10, 2, self.x, self.y, 3)
+    local next = create(blob_green, self.x, self.y)
+    next.hit_h = self.hit_h
+    next.hit_w = self.hit_w
+end
+
+function missile.draw(self)
+    self.flip_x = self.speed_x < 0
+    self.flip_y = self.speed_y > 0
+    -- choose sprite based on speed
+    local thsp = 1.8
+    local current_spr = abs(self.speed_x) > thsp * abs(self.speed_y) and self.sprs[3]
+    or abs(self.speed_y) > thsp * abs(self.speed_x) and self.sprs[1]
+    or self.sprs[2]
+    sspr((current_spr % 16) * 8, flr(current_spr \ 16) * 8,
+    self.spr_w, self.spr_h, self.x, self.y, self.hit_w, self.hit_h, self.flip_x, self.flip_y)
+end
+
 -- PARTICLES
 particles = {}
 

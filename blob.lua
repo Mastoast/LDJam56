@@ -5,6 +5,7 @@ blob.jump_spr = 4
 blob.linked = {}
 blob.acc = 0.4
 blob.friction = 0.8
+blob.nbscale = 1
 
 function blob.update(self)
     local on_ground = self:check_solid(0, 1)
@@ -17,15 +18,6 @@ function blob.update(self)
 
     -- friction
     self.speed_x *= self.friction
-
-    --size
-    if btnp(⬆️) then
-        scale_up(self)
-    end
-    if btnp(⬇️) then
-        scale_down(self)
-    end
-
 
     -- gravity
     local max_spd = 3.3
@@ -55,6 +47,32 @@ function blob.update(self)
         self.speed_y = -2
     end
 
+    -- interactions
+    for o in all(objects) do
+        if o.base == blob_green and self:overlaps(o) and o.hit_w < self.hit_w then
+            o.destroyed = true
+            spawn_particles(self.hit_w, 2, o.x, o.y, 3)
+            scale_up(self)
+        end
+    end
+
+    --size
+    -- if btnp(⬆️) then
+    --     scale_up(self)
+    -- end
+    -- if btnp(⬇️) then
+    --     scale_down(self)
+    -- end
+
+    -- shoot missile
+    if btnp(🅾️) and self.hit_w > 2 then
+        self.hit_h -= self.nbscale; self.hit_w -= self.nbscale
+        local m = create(missile, self.x + self.hit_h/2, self.y)
+        m.hit_h = self.hit_h - self.nbscale; m.hit_w = self.hit_w - self.nbscale
+        m.speed_x = (self.facing * 1.5 + self.speed_x) * self.hit_w / 8
+        m.speed_y = (btn(⬆️) and -1.5 or -0.5) * self.hit_h / 8
+    end
+
     -- move
     self:move_x(self.speed_x, function(self, ox, nx)
         self.speed_x = 0
@@ -63,40 +81,37 @@ function blob.update(self)
     self:move_y(self.speed_y, function(self, oy, ny)
         self.speed_y = 0
     end)
+end
 
-    -- interactions
-    for o in all(objects) do
-        if o.base == blob_green and self:overlaps(o) and o.hit_w < self.hit_w then
-            o.destroyed = true
-            scale_up(self)
-            scale_up(self)
-        end
-    end
-
+function blob.dmg(self)
+    self.speed_x = self.facing * -4.2
+    self.speed_y = -4
+    -- spawn_particles(8, 2, self.x + self.hit_w / 2, self.y + self.hit_h / 2, 8)
 end
 
 function scale_up(self)
-    if not self:check_solid(self.facing, 0) then
-        self.hit_w += 1
-        self.hit_h += 1
-        self.x -= self.facing
-        self.y -= 1
-    elseif not self:check_solid(-self.facing, 0) then
-        self.hit_w += 1
-        self.hit_h += 1
-        self.y -= 1
+    if not self:check_solid(self.facing * self.nbscale, 0) then
+        self.hit_w += self.nbscale
+        self.hit_h += self.nbscale
+        self.x -= self.facing * self.nbscale
+        self.y -= self.nbscale
+    elseif not self:check_solid(-self.facing * self.nbscale, 0) then
+        self.hit_w += self.nbscale
+        self.hit_h += self.nbscale
+        self.y -= self.nbscale
     end
 end
 
 function scale_down(self)
-    if self.hit_w == 1 then return end
-    self.hit_w -= 1
-    self.hit_h -= 1
+    if self.hit_w <= self.nbscale then return end
+    self.hit_w -= self.nbscale
+    self.hit_h -= self.nbscale
 end
 
 function blob.draw(self)
     local anim_speed = 16
-    local current_spr = self.speed_y != 0 and self.jump_spr or self.sprs[flr(gtime / anim_speed) % #self.sprs + 1]
+    local current_spr = self.speed_y != 0 and self.jump_spr
+    or self.sprs[flr(gtime / anim_speed) % #self.sprs + 1]
     sspr((current_spr % 16) * 8, flr(current_spr \ 16) * 8,
     self.spr_w, self.spr_h, self.x, self.y, self.hit_w, self.hit_h, self.flip_x, self.flip_y)
 end
@@ -110,7 +125,7 @@ function blob_green.update(self)
     -- gravity
     local on_ground = self:check_solid(0, 1)
     if not on_ground then
-        self.speed_y = min(self.speed_y + 0.8, 4.4)
+        self.speed_y = min(self.speed_y + 0.5, 4.4)
     else
         self.speed_y = 0
     end
@@ -127,7 +142,8 @@ end
 
 function blob_green.draw(self)
     local anim_speed = 16
-    local current_spr = self.speed_y != 0 and self.jump_spr or self.sprs[flr(gtime / anim_speed) % #self.sprs + 1]
+    local current_spr = self.speed_y != 0 and self.jump_spr
+    or self.sprs[flr(gtime / anim_speed) % #self.sprs + 1]
     sspr((current_spr % 16) * 8, flr(current_spr \ 16) * 8,
     self.spr_w, self.spr_h, self.x, self.y, self.hit_w, self.hit_h, self.flip_x, self.flip_y)
 end
