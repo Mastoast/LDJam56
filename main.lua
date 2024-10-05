@@ -24,18 +24,18 @@ function init_level()
     --     end
     -- end
     create(blob, 8, 0)
-    local test = create(blob_green, 32, 0)
-    test.hit_h = 2
-    test.hit_w = 2
-    local test = create(blob_green, 40, 0)
-    test.hit_h = 4
-    test.hit_w = 4
-    local test = create(blob_green, 50, 0)
-    test.hit_h = 6
-    test.hit_w = 6
-    local test = create(blob_green, 60, 0)
-    test.hit_h = 8
-    test.hit_w = 8
+    -- local test = create(blob_green, 32, 0)
+    -- test.hit_h = 2
+    -- test.hit_w = 2
+    -- local test = create(blob_green, 40, 0)
+    -- test.hit_h = 4
+    -- test.hit_w = 4
+    -- local test = create(blob_green, 50, 0)
+    -- test.hit_h = 6
+    -- test.hit_w = 6
+    -- local test = create(blob_green, 60, 0)
+    -- test.hit_h = 8
+    -- test.hit_w = 8
 end
 
 function _update60()

@@ -3,15 +3,20 @@ blob.jump_count = 0
 blob.sprs = {1, 2, 1, 3}
 blob.jump_spr = 4
 blob.linked = {}
+blob.acc = 0.4
+blob.friction = 0.8
 
 function blob.update(self)
     local on_ground = self:check_solid(0, 1)
 
-    if btn(⬅️) then self.speed_x = -1
-    elseif btn(➡️) then self.speed_x = 1
-    else self.speed_x = 0 end
-    if self.speed_x != 0 then self.facing = self.speed_x end
+    local c_acc = self.acc * self.hit_w / 8 * 0.6
+    if btn(⬅️) then self.speed_x -= c_acc; self.facing = -1
+    elseif btn(➡️) then self.speed_x += c_acc; self.facing = 1
+    end
     self.flip_x = self.facing == -1
+
+    -- friction
+    self.speed_x *= self.friction
 
     --size
     if btnp(⬆️) then
@@ -43,7 +48,7 @@ function blob.update(self)
             self.jump_count = 0
         end
     end
-    printable = self.jump_count
+
     -- jump
     if on_ground and btnp(❎) then
         self.jump_count = 7
@@ -71,15 +76,14 @@ function blob.update(self)
 end
 
 function scale_up(self)
-    if not self:check_solid(1, 0) then
+    if not self:check_solid(self.facing, 0) then
         self.hit_w += 1
         self.hit_h += 1
-        self.x += 1
+        self.x -= self.facing
         self.y -= 1
-    elseif not self:check_solid(-1, 0) then
+    elseif not self:check_solid(-self.facing, 0) then
         self.hit_w += 1
         self.hit_h += 1
-        self.x -= 1
         self.y -= 1
     end
 end
