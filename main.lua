@@ -8,7 +8,7 @@ function _init()
     --
     init_level()
     -- diable btn repeat
-    poke(0x5f5d, 25)
+    poke(0X5F5C, 255)
 end
 
 function init_level()
@@ -24,7 +24,7 @@ function init_level()
     --     end
     -- end
     player = create(blob, 8, 0)
-    create(bat, 32, 32)
+    -- create(bat, 32, 32)
 end
 
 function _update60()
@@ -40,6 +40,9 @@ function update_level()
         freeze_time -= 1
         return
     end
+
+    -- cam
+    cam.x = lerp(cam.x, player.x - 64 + player.facing * 12, 0.1)
 
     -- screenshake
     shake = max(shake - 1)
@@ -72,7 +75,7 @@ function _draw()
     end
 
     -- draw map
-    map(0, 0, 0, 0, 16, 16)
+    map()
 
     -- draw objects
     for o in all(objects) do

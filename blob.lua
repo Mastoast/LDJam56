@@ -56,14 +56,6 @@ function blob.update(self)
         end
     end
 
-    --size
-    -- if btnp(⬆️) then
-    --     scale_up(self)
-    -- end
-    -- if btnp(⬇️) then
-    --     scale_down(self)
-    -- end
-
     -- shoot missile
     if btnp(🅾️) and self.hit_w > 2 then
         local m = create(missile, self.x + self.hit_w/2, self.y)
@@ -88,7 +80,14 @@ end
 function blob.dmg(self)
     self.speed_x = self.facing * -4.2
     self.speed_y = -4
-    -- spawn_particles(8, 2, self.x + self.hit_w / 2, self.y + self.hit_h / 2, 8)
+    spawn_particles(8, 2, self.x + self.hit_w / 2, self.y + self.hit_h / 2, 8)
+    local m = create(missile, self.x + self.hit_w/2, self.y)
+    m.hit_h = self.hit_h - 2*self.nbscale
+    m.hit_w = self.hit_w - 2*self.nbscale
+    m.speed_x = (-self.facing * 2.5) * self.hit_w / 8
+    m.speed_y = -2.0 * self.hit_h / 8
+    scale_down(self)
+    shake = 10
 end
 
 function scale_up(self)

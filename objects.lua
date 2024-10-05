@@ -54,11 +54,14 @@ bat = new_type(10)
 bat.sprs = {10, 12}
 bat.hit_w = 16
 bat.spr_w = 16
+bat.cd = 0
+bat.min_cd = 60
+bat.max_cd = 90
 
 function bat.update(self)
 
     -- fly pattern
-    self.speed_x = 1.5 * cos(gtime / 60)
+    self.speed_x = 1.5 * cos(gtime / 120)
     self.speed_y = 0.5 * sin(gtime / 180)
 
     self:move_x(self.speed_x, function(self, ox, nx)
@@ -68,6 +71,24 @@ function bat.update(self)
     self:move_y(self.speed_y, function(self, oy, ny)
         self.speed_y = 0
     end)
+
+    -- shoot
+    if self.cd <= 0 then
+        self:shoot()
+        self.cd = rnd(self.max_cd - self.min_cd) + self.min_cd
+    else
+        self.cd -= 1
+    end
+end
+
+function bat.shoot(self)
+    local b = create(bullet, self.x + self.hit_w / 2, self.y + self.hit_h / 2)
+    -- focus player 
+    local dx = player.x - self.x + self.hit_w / 2
+    local dy = player.y - self.y
+    local d = sqrt(dx * dx + dy * dy)
+    b.speed_x = dx / d * 2
+    b.speed_y = dy / d * 2
 end
 
 function bat.dmg(self)
@@ -80,6 +101,32 @@ function bat.draw(self)
     local current_spr = self.sprs[flr(gtime / anim_speed) % #self.sprs + 1]
     sspr((current_spr % 16) * 8, flr(current_spr \ 16) * 8,
     self.spr_w, self.spr_h, self.x, self.y, self.hit_w, self.hit_h, self.flip_x, self.flip_y)
+end
+
+bullet = new_type(14)
+bullet.hit_h = 4
+bullet.hit_w = 4
+bullet.hit_x = 2
+bullet.hit_y = 2
+
+function bullet.update(self)
+    self:move_x(self.speed_x, function(self, ox, nx)
+        self:dmg()
+    end)
+
+    self:move_y(self.speed_y, function(self, oy, ny)
+        self:dmg()
+    end)
+end
+
+function bullet.dmg(self)
+    self.destroyed = true
+    spawn_particles(2, 2, self.x, self.y, 13)
+end
+
+function bullet.draw(self)
+    local flip_x = gtime % 16 > 8
+    spr(self.spr, self.x, self.y, 1, 1, flip_x)
 end
 
 -- PARTICLES
