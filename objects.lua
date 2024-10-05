@@ -75,7 +75,7 @@ function bat.update(self)
     -- shoot
     if self.cd <= 0 then
         self:shoot()
-        self.cd = rnd(self.max_cd - self.min_cd) + self.min_cd
+        self.cd = rrnd(self.min_cd, self.max_cd)
     else
         self.cd -= 1
     end

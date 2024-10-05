@@ -6,8 +6,35 @@ blob.linked = {}
 blob.acc = 0.4
 blob.friction = 0.8
 blob.nbscale = 1
+blob.state = 1 -- 1 = normal, 2 = resize
 
 function blob.update(self)
+    local on_ground = self:check_solid(0, 1)
+    if on_ground and btn(⬇️) then
+        self.state = 2
+    else
+        self.state = 1
+    end
+    
+    if self.state == 1 then
+        self:update_normal()
+    else
+        self:update_resize()
+    end
+end
+
+function blob.update_resize(self)
+    if btnp(➡️) and self.hit_w > 2*self.nbscale then
+        self.hit_w -= self.nbscale
+        self.hit_h += self.nbscale
+        self.y -= self.nbscale
+    elseif btnp(⬅️) and self.hit_h > 2*self.nbscale then
+        self.hit_h -= self.nbscale
+        self.hit_w += self.nbscale
+    end
+end
+
+function blob.update_normal(self)
     local on_ground = self:check_solid(0, 1)
 
     local c_acc = self.acc * self.hit_w / 8 * 0.6
@@ -52,19 +79,13 @@ function blob.update(self)
         if o.base == blob_green and self:overlaps(o) and o.hit_w < self.hit_w then
             o.destroyed = true
             spawn_particles(self.hit_w, 2, o.x, o.y, 3)
-            scale_up(self)
+            scale_up(self, self.nbscale, self.nbscale)
         end
     end
 
     -- shoot missile
     if btnp(🅾️) and self.hit_w > 2 then
-        local m = create(missile, self.x + self.hit_w/2, self.y)
-        m.hit_h = self.hit_h - 2*self.nbscale
-        m.hit_w = self.hit_w - 2*self.nbscale
-        m.speed_x = (self.facing * 1.5 + self.speed_x) * self.hit_w / 8
-        m.speed_y = (not btn(⬆️) and -0.5 or -1.5) * self.hit_h / 8
-        if btn(⬆️) and abs(self.speed_x) < 0.2 then m.speed_y, m.speed_x = -2.5, 0 end
-        scale_down(self)
+        self:shoot()
     end
 
     -- move
@@ -77,6 +98,16 @@ function blob.update(self)
     end)
 end
 
+function blob.shoot(self)
+    local m = create(missile, self.x + self.hit_w/2, self.y)
+    m.hit_h = self.hit_h - 2*self.nbscale
+    m.hit_w = self.hit_w - 2*self.nbscale
+    m.speed_x = (self.facing * 1.5 + self.speed_x) * self.hit_w / 8
+    m.speed_y = (not btn(⬆️) and -0.5 or -1.5) * self.hit_h / 8
+    if btn(⬆️) and abs(self.speed_x) < 0.2 then m.speed_y, m.speed_x = -2.5, 0 end
+    scale_down(self, -self.nbscale, -self.nbscale)
+end
+
 function blob.dmg(self)
     self.speed_x = self.facing * -4.2
     self.speed_y = -4
@@ -86,27 +117,32 @@ function blob.dmg(self)
     m.hit_w = self.hit_w - 2*self.nbscale
     m.speed_x = (-self.facing * 2.5) * self.hit_w / 8
     m.speed_y = -2.0 * self.hit_h / 8
-    scale_down(self)
+    scale_down(self, -self.nbscale, -self.nbscale)
     shake = 10
 end
 
-function scale_up(self)
-    if not self:check_solid(self.facing * self.nbscale, 0) then
-        self.hit_w += self.nbscale
-        self.hit_h += self.nbscale
-        self.x -= self.facing * self.nbscale
-        self.y -= self.nbscale
-    elseif not self:check_solid(-self.facing * self.nbscale, 0) then
-        self.hit_w += self.nbscale
-        self.hit_h += self.nbscale
-        self.y -= self.nbscale
+
+function scale_up(self, x, y)
+    x = x or 1
+    y = y or 1
+    if not self:check_solid(self.facing * x, 0) then
+        self.hit_w += x
+        self.hit_h += y
+        self.x -= self.facing * x
+        self.y -= y
+    elseif not self:check_solid(-self.facing * x, 0) then
+        self.hit_w += x
+        self.hit_h += y
+        self.y -= y
     end
 end
 
-function scale_down(self)
-    if self.hit_w <= self.nbscale then return end
-    self.hit_w -= self.nbscale
-    self.hit_h -= self.nbscale
+function scale_down(self, x, y)
+    x = x or -1
+    y = y or -1
+    if self.hit_w - x <= self.nbscale or self.hit_h - y <= self.nbscale then return end
+    self.hit_w += x
+    self.hit_h += y
 end
 
 function blob.draw(self)

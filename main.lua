@@ -42,7 +42,8 @@ function update_level()
     end
 
     -- cam
-    cam.x = lerp(cam.x, player.x - 64 + player.facing * 12, 0.1)
+    local offset_x = player.state == 1 and player.facing * 12 or 0
+    cam.x = lerp(cam.x, player.x - 64 + offset_x, 0.1)
 
     -- screenshake
     shake = max(shake - 1)
