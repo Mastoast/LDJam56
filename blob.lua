@@ -7,9 +7,11 @@ blob.acc = 0.4
 blob.friction = 0.8
 blob.nbscale = 1
 blob.state = 1 -- 1 = normal, 2 = resize
+blob.pg = false
 
 function blob.update(self)
     local on_ground = self:check_solid(0, 1)
+
     if on_ground and btn(⬇️) then
         self.state = 2
     else
@@ -21,6 +23,7 @@ function blob.update(self)
     else
         self:update_resize()
     end
+    printable = "x: " .. self.hit_w .. " y: " .. self.hit_h
 end
 
 function blob.update_resize(self)
@@ -72,14 +75,17 @@ function blob.update_normal(self)
     if on_ground and btnp(❎) then
         self.jump_count = 7
         self.speed_y = -2
+        self.pg = false
+        sfx(9, 0, 8, 4)
     end
 
     -- interactions
     for o in all(objects) do
-        if o.base == blob_green and self:overlaps(o) and o.hit_w < self.hit_w then
+        if o.base == blob_green and self:overlaps(o) then
             o.destroyed = true
             spawn_particles(self.hit_w, 2, o.x, o.y, 3)
             scale_up(self, self.nbscale, self.nbscale)
+            sfx(8, 0, 24, 8)
         end
     end
 
@@ -95,17 +101,19 @@ function blob.update_normal(self)
 
     self:move_y(self.speed_y, function(self, oy, ny)
         self.speed_y = 0
+        spawn_particles(3, 3, self.x + self.hit_w / 2, self.y + self.hit_h, 3)
     end)
 end
 
 function blob.shoot(self)
     local m = create(missile, self.x + self.hit_w/2, self.y)
-    m.hit_h = self.hit_h - 2*self.nbscale
-    m.hit_w = self.hit_w - 2*self.nbscale
+    m.hit_h = flr(self.hit_h/2)
+    m.hit_w = flr(self.hit_w/2)
     m.speed_x = (self.facing * 1.5 + self.speed_x) * self.hit_w / 8
     m.speed_y = (not btn(⬆️) and -0.5 or -1.5) * self.hit_h / 8
     if btn(⬆️) and abs(self.speed_x) < 0.2 then m.speed_y, m.speed_x = -2.5, 0 end
     scale_down(self, -self.nbscale, -self.nbscale)
+    sfx(8, 0, 4, 4)
 end
 
 function blob.dmg(self)
@@ -119,6 +127,7 @@ function blob.dmg(self)
     m.speed_y = -2.0 * self.hit_h / 8
     scale_down(self, -self.nbscale, -self.nbscale)
     shake = 10
+    sfx(8, 0, 24, 4)
 end
 
 
@@ -135,6 +144,7 @@ function scale_up(self, x, y)
         self.hit_h += y
         self.y -= y
     end
+    -- what to do when the player is stuck?
 end
 
 function scale_down(self, x, y)

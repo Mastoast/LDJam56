@@ -36,6 +36,7 @@ function missile.dmg(self)
     local next = create(blob_green, self.x, self.y)
     next.hit_h = self.hit_h
     next.hit_w = self.hit_w
+    sfx(9, 0, 12, 4)
 end
 
 function missile.draw(self)
@@ -122,12 +123,35 @@ end
 function bullet.dmg(self)
     self.destroyed = true
     spawn_particles(2, 2, self.x, self.y, 13)
+    sfx(9, 0, 12, 4)
 end
 
 function bullet.draw(self)
     local flip_x = gtime % 16 > 8
     spr(self.spr, self.x, self.y, 1, 1, flip_x)
 end
+
+roof = new_type(32)
+roof.hit_h = 4
+roof.hit_w = 8
+
+function roof.draw(self)
+end
+
+target = new_type(26)
+target.hit_h = 6
+target.hit_w = 6
+
+function target.dmg(self)
+    self.destroyed = true
+    spawn_particles(10, 2, self.x, self.y, 3)
+    sfx(8, 0, 24, 4)
+    self:trg()
+end
+
+function target.trg(self)
+end
+
 
 -- PARTICLES
 particles = {}
